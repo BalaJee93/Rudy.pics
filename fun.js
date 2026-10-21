@@ -19,6 +19,8 @@
     return audio;
   }
 
+  window.rudyAudio = ctx;
+
   function tone(type, from, to, dur, vol, delay) {
     const a = ctx();
     if (!a) return;
