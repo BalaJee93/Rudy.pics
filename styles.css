@@ -502,14 +502,19 @@ footer {
 
 /* ---------- ABC time ---------- */
 
-.abc-button {
+.learn-bar {
   position: fixed;
   left: 50%;
   bottom: 16px;
   z-index: 8;
+  display: flex;
+  gap: 10px;
   transform: translateX(-50%);
+}
+
+.learn-button {
   height: 56px;
-  padding: 0 20px;
+  padding: 0 18px;
   border: 0;
   border-radius: 28px;
   background: var(--card);
@@ -518,18 +523,19 @@ footer {
   font-weight: 700;
   font-size: 28px;
   line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.abc-button span {
+.learn-button span {
   display: inline-block;
   animation: wave 2.4s ease-in-out infinite;
 }
 
-.abc-button .abc-a { color: #ff5c5c; }
-.abc-button .abc-b { color: #5cc8ff; animation-delay: 0.15s; }
-.abc-button .abc-c { color: #7bd389; animation-delay: 0.3s; }
+.learn-button .c1 { color: #ff5c5c; }
+.learn-button .c2 { color: #5cc8ff; animation-delay: 0.15s; }
+.learn-button .c3 { color: #7bd389; animation-delay: 0.3s; }
 
 .abc-stage {
   position: fixed;
@@ -571,10 +577,22 @@ footer {
 }
 
 .abc-pic {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: min(78vw, 420px);
   font-size: min(26vw, 130px);
   line-height: 1.1;
-  animation: cow-wiggle 0.6s ease-in-out infinite alternate;
 }
+
+.abc-pic span {
+  display: inline-block;
+  animation: pop-in 0.5s cubic-bezier(.3, 1.5, .5, 1) backwards, cow-wiggle 0.6s ease-in-out infinite alternate;
+  animation-delay: calc(var(--k, 0) * 0.35s), 0s;
+}
+
+.abc-pic.many { font-size: min(12vw, 60px); }
+.abc-pic.lots { font-size: min(10vw, 48px); }
 
 .abc-word {
   font-size: min(9vw, 2.6rem);
@@ -624,13 +642,15 @@ footer {
 }
 
 @media (max-width: 600px) {
-  .abc-button {
+  .learn-bar { gap: 8px; }
+
+  .learn-button {
     height: 48px;
-    padding: 0 16px;
-    font-size: 24px;
+    padding: 0 12px;
+    font-size: 22px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .abc-button span, .abc-pic, .abc-card.in { animation: none; }
+  .learn-button span, .abc-pic span, .abc-card.in { animation: none; }
 }

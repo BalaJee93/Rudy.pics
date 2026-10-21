@@ -1,6 +1,7 @@
-// ABC time! Shows each letter big with a picture and reads it out loud.
+// Learning time! ABC shows each letter with a picture and its sound, and 123 counts
+// from 1 to 10. Both read out loud in a kid-style voice over a soft beat.
 (function () {
-  const ABC = [
+  const LETTERS = [
     ["A", "Apple", "🍎"], ["B", "Ball", "⚽"], ["C", "Cow", "🐄"], ["D", "Dog", "🐶"],
     ["E", "Elephant", "🐘"], ["F", "Fish", "🐟"], ["G", "Grapes", "🍇"], ["H", "Horse", "🐴"],
     ["I", "Insect", "🐞"], ["J", "Juice", "🧃"], ["K", "Kite", "🪁"], ["L", "Lion", "🦁"],
@@ -15,28 +16,77 @@
     J: "juh", K: "kuh", L: "luh", M: "muh", N: "nuh", O: "aw", P: "puh", Q: "kwuh", R: "ruh",
     S: "sss", T: "tuh", U: "uh", V: "vuh", W: "wuh", X: "ks", Y: "yuh", Z: "zuh",
   };
+  const NUMBER_WORDS = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+  const COUNT_THINGS = [
+    ["cow", "cows", "🐄"], ["ball", "balls", "⚽"], ["car", "cars", "🚗"], ["duck", "ducks", "🦆"],
+    ["apple", "apples", "🍎"], ["fish", "fish", "🐟"], ["star", "stars", "⭐"],
+    ["balloon", "balloons", "🎈"], ["banana", "bananas", "🍌"], ["teddy", "teddies", "🧸"],
+  ];
+  const cap = (w) => w[0].toUpperCase() + w.slice(1);
+
+  const DECKS = {
+    abc: {
+      done: "Yay Rudy! A to Z!",
+      items: LETTERS.map(([letter, word, pic]) => {
+        const lower = letter.toLowerCase();
+        const sound = SOUNDS[letter];
+        // Spell "A" as it sounds, or some voices read it as "uh for apple".
+        const spoken = letter === "A" ? "Ay" : letter;
+        return {
+          big: letter + lower,
+          pics: [pic],
+          word: "<b>" + letter + "</b> for " + word,
+          sub: lower + " · " + lower + " · " + word.toLowerCase(),
+          // Like the phonics song: "A for Apple! ah, ah, apple!"
+          lines: [spoken + " for " + word + "!", sound + ", " + sound + ", " + word.toLowerCase() + "!"],
+        };
+      }),
+    },
+    count: {
+      done: "Yay Rudy! You counted to 10!",
+      items: COUNT_THINGS.map(([one, many, pic], i) => {
+        const n = i + 1;
+        const name = n === 1 ? one : many;
+        const counting = NUMBER_WORDS.slice(0, n);
+        return {
+          big: String(n),
+          pics: Array(n).fill(pic),
+          word: "<b>" + n + "</b> " + name,
+          sub: counting.join(" · "),
+          // "Three! one, two, three! Three cars!"
+          lines: [cap(NUMBER_WORDS[i]) + "!"]
+            .concat(n > 1 ? [counting.join(", ") + "!"] : [])
+            .concat([cap(NUMBER_WORDS[i]) + " " + name + "!"]),
+        };
+      }),
+    },
+  };
+
   const COLORS = ["#ff8a5c", "#5cc8ff", "#7bd389", "#c77dff", "#ffb703", "#ff8fab"];
   const speech = window.speechSynthesis;
+  const RATE = 0.75; // a little slow so Rudy can follow along
 
-  const button = document.createElement("button");
-  button.className = "abc-button";
-  button.type = "button";
-  button.innerHTML = '<span class="abc-a">A</span><span class="abc-b">B</span><span class="abc-c">C</span>';
-  button.setAttribute("aria-label", "Start ABC");
-  document.body.appendChild(button);
+  const bar = document.createElement("div");
+  bar.className = "learn-bar";
+  bar.innerHTML =
+    '<button class="learn-button" type="button" data-deck="abc" aria-label="Start ABC">' +
+    '<span class="c1">A</span><span class="c2">B</span><span class="c3">C</span></button>' +
+    '<button class="learn-button" type="button" data-deck="count" aria-label="Start counting">' +
+    '<span class="c1">1</span><span class="c2">2</span><span class="c3">3</span></button>';
+  document.body.appendChild(bar);
 
   const stage = document.createElement("div");
   stage.className = "abc-stage";
   stage.hidden = true;
   stage.innerHTML =
-    '<button class="abc-close" type="button" aria-label="Stop ABC">&times;</button>' +
+    '<button class="abc-close" type="button" aria-label="Stop">&times;</button>' +
     '<button class="abc-card" type="button" aria-label="Say it again">' +
     '<span class="abc-letter"></span><span class="abc-pic"></span><span class="abc-word"></span>' +
     '<span class="abc-sound"></span>' +
     "</button>" +
     '<div class="abc-nav">' +
-    '<button class="abc-prev" type="button" aria-label="Previous letter">&#8249;</button>' +
-    '<button class="abc-next" type="button" aria-label="Next letter">&#8250;</button>' +
+    '<button class="abc-prev" type="button" aria-label="Previous">&#8249;</button>' +
+    '<button class="abc-next" type="button" aria-label="Next">&#8250;</button>' +
     "</div>";
   document.body.appendChild(stage);
 
@@ -46,6 +96,7 @@
   const wordEl = stage.querySelector(".abc-word");
   const soundEl = stage.querySelector(".abc-sound");
 
+  let deck = DECKS.abc;
   let index = 0;
   let timer = null;
   let run = 0; // bumps on every change so stale "next" callbacks are ignored
@@ -77,63 +128,66 @@
     speech.speak(u);
   }
 
+  function popCard() {
+    card.classList.remove("in");
+    void card.offsetWidth; // restart the pop-in animation
+    card.classList.add("in");
+  }
+
   function show(i, autoNext) {
-    index = (i + ABC.length) % ABC.length;
-    const [letter, word, pic] = ABC[index];
+    const items = deck.items;
+    index = (i + items.length) % items.length;
+    const item = items[index];
     const myRun = ++run;
     clearTimeout(timer);
     let moved = false;
 
     stage.style.setProperty("--abc", COLORS[index % COLORS.length]);
-    letterEl.textContent = letter + letter.toLowerCase();
-    picEl.textContent = pic;
-    wordEl.innerHTML = "<b>" + letter + "</b> for " + word;
-    const lower = letter.toLowerCase();
-    soundEl.textContent = lower + " · " + lower + " · " + word.toLowerCase();
-    card.classList.remove("in");
-    void card.offsetWidth; // restart the pop-in animation
-    card.classList.add("in");
+    letterEl.textContent = item.big;
+    picEl.innerHTML = item.pics.map((p, k) => '<span style="--k:' + k + '">' + p + "</span>").join("");
+    picEl.classList.toggle("many", item.pics.length > 1);
+    picEl.classList.toggle("lots", item.pics.length > 5);
+    wordEl.innerHTML = item.word;
+    soundEl.textContent = item.sub;
+    popCard();
 
     const next = () => {
       if (moved || myRun !== run || stage.hidden || !autoNext) return;
       moved = true;
       timer = setTimeout(() => {
         if (myRun !== run || stage.hidden) return;
-        if (index === ABC.length - 1) {
+        if (index === items.length - 1) {
           cheer();
         } else {
           show(index + 1, true);
         }
-      }, 900);
+      }, 1000);
     };
 
     if (speech) {
       speech.cancel();
-      // Like the phonics song: "A for Apple! ah, ah, apple!"
-      // Spell "A" as it sounds, or some voices read it as "uh for apple".
-      const spoken = letter === "A" ? "Ay" : letter;
-      const sound = SOUNDS[letter];
-      say(spoken + " for " + word + "!", 1.8, 0.95);
-      say(sound + ", " + sound + ", " + word.toLowerCase() + "!", 1.9, 1, next);
+      item.lines.forEach((line, k) => {
+        const last = k === item.lines.length - 1;
+        say(line, k === 0 ? 1.9 : 1.8, RATE, last ? next : null);
+      });
       // Safety net in case the browser never reports the end of speech.
-      setTimeout(next, 9000);
+      setTimeout(next, 14000);
     } else {
-      timer = setTimeout(next, 2200);
+      timer = setTimeout(next, 3000);
     }
   }
 
   function cheer() {
     letterEl.textContent = "🎉";
-    picEl.textContent = "⭐";
-    wordEl.textContent = "Yay Rudy! A to Z!";
+    picEl.innerHTML = "<span>⭐</span>";
+    picEl.classList.remove("many", "lots");
+    wordEl.textContent = deck.done;
     soundEl.textContent = "";
-    card.classList.remove("in");
-    void card.offsetWidth;
-    card.classList.add("in");
+    popCard();
     if (speech) {
       speech.cancel();
-      say("Yaaay!", 2, 0.9);
-      say("Well done Rudy!", 1.8, 0.95);
+      say("Yaaay!", 2, RATE);
+      say("Well done Rudy!", 1.8, RATE);
     }
   }
 
@@ -210,7 +264,8 @@
     beat = null;
   }
 
-  function open() {
+  function open(name) {
+    deck = DECKS[name];
     stage.hidden = false;
     startBeat();
     show(0, true);
@@ -224,7 +279,7 @@
     stage.hidden = true;
   }
 
-  button.addEventListener("click", open);
+  bar.querySelectorAll(".learn-button").forEach((b) => b.addEventListener("click", () => open(b.dataset.deck)));
   stage.querySelector(".abc-close").addEventListener("click", close);
   stage.querySelector(".abc-prev").addEventListener("click", () => show(index - 1, true));
   stage.querySelector(".abc-next").addEventListener("click", () => show(index + 1, true));
