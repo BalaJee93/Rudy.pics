@@ -42,13 +42,31 @@
   let timer = null;
   let run = 0; // bumps on every change so stale "next" callbacks are ignored
 
+  // Browsers have no real child voices, so pick a bright female voice and pitch it
+  // up high, with short excited phrases, to sound like a little kid teaching.
   function voice() {
     const voices = speech ? speech.getVoices() : [];
+    const english = voices.filter((v) => /^en/i.test(v.lang) && !/male\b|daniel|alex|fred|rishi|aaron|arthur|guy|david|mark/i.test(v.name));
     return (
-      voices.find((v) => /en[-_](IN|GB|US)/i.test(v.lang) && /female|samantha|veena|karen|moira|google/i.test(v.name)) ||
-      voices.find((v) => /^en/i.test(v.lang)) ||
+      english.find((v) => /samantha|karen|tessa|moira|veena|aria|jenny|ana|zira|female/i.test(v.name)) ||
+      english.find((v) => /google/i.test(v.name)) ||
+      english[0] ||
       null
     );
+  }
+
+  function say(text, pitch, rate, onend) {
+    const u = new SpeechSynthesisUtterance(text);
+    const v = voice();
+    if (v) u.voice = v;
+    u.lang = v ? v.lang : "en-US";
+    u.pitch = pitch;
+    u.rate = rate;
+    if (onend) {
+      u.onend = onend;
+      u.onerror = onend;
+    }
+    speech.speak(u);
   }
 
   function show(i, autoNext) {
@@ -81,17 +99,11 @@
 
     if (speech) {
       speech.cancel();
-      const u = new SpeechSynthesisUtterance(letter + ". " + letter + " for " + word + ".");
-      const v = voice();
-      if (v) u.voice = v;
-      u.lang = v ? v.lang : "en-US";
-      u.rate = 0.8;
-      u.pitch = 1.2;
-      u.onend = next;
-      u.onerror = next;
-      speech.speak(u);
+      // Sing-song: the letter on its own up high, then the word a little lower.
+      say(letter + "!", 2, 0.9);
+      say(letter + " for " + word + "!", 1.7, 0.95, next);
       // Safety net in case the browser never reports the end of speech.
-      setTimeout(next, 6000);
+      setTimeout(next, 7000);
     } else {
       timer = setTimeout(next, 2200);
     }
@@ -106,12 +118,8 @@
     card.classList.add("in");
     if (speech) {
       speech.cancel();
-      const u = new SpeechSynthesisUtterance("Yay! Well done Rudy!");
-      const v = voice();
-      if (v) u.voice = v;
-      u.rate = 0.9;
-      u.pitch = 1.3;
-      speech.speak(u);
+      say("Yaaay!", 2, 0.9);
+      say("Well done Rudy!", 1.8, 0.95);
     }
   }
 
