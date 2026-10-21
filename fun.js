@@ -11,6 +11,8 @@
     if (!audio) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return null;
+      // Let sounds play on iPhones even when the silent switch is on.
+      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
       audio = new AC();
     }
     if (audio.state === "suspended") audio.resume();
@@ -33,12 +35,59 @@
     osc.stop(t + dur);
   }
 
+  // A cartoon "Mooo": buzzy low voice that opens up then sinks, with a little wobble.
+  function moo(delay) {
+    const a = ctx();
+    if (!a) return;
+    const t = a.currentTime + (delay || 0);
+    const filter = a.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.Q.value = 6;
+    filter.frequency.setValueAtTime(300, t);
+    filter.frequency.linearRampToValueAtTime(900, t + 0.35);
+    filter.frequency.linearRampToValueAtTime(350, t + 1.3);
+    const gain = a.createGain();
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.exponentialRampToValueAtTime(0.4, t + 0.15);
+    gain.gain.setValueAtTime(0.4, t + 0.9);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+    filter.connect(gain).connect(a.destination);
+
+    const lfo = a.createOscillator();
+    const lfoDepth = a.createGain();
+    lfo.frequency.value = 5;
+    lfoDepth.gain.value = 3;
+    lfo.connect(lfoDepth);
+
+    [0, 3].forEach((detune) => {
+      const osc = a.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(115 + detune, t);
+      osc.frequency.linearRampToValueAtTime(145 + detune, t + 0.3);
+      osc.frequency.linearRampToValueAtTime(100 + detune, t + 1.4);
+      lfoDepth.connect(osc.frequency);
+      osc.connect(filter);
+      osc.start(t);
+      osc.stop(t + 1.4);
+    });
+    lfo.start(t);
+    lfo.stop(t + 1.4);
+  }
+
   const SOUNDS = {
     pop: () => tone("sine", 900, 120, 0.15, 0.35),
-    vroom: () => {
-      tone("sawtooth", 70, 260, 0.45, 0.12);
-      tone("sawtooth", 260, 90, 0.35, 0.1, 0.45);
+    honk: () => {
+      [0, 0.18].forEach((d) => {
+        tone("square", 420, 420, 0.12, 0.12, d);
+        tone("square", 530, 530, 0.12, 0.08, d);
+      });
     },
+    vroom: () => {
+      SOUNDS.honk();
+      tone("sawtooth", 70, 260, 0.45, 0.14, 0.35);
+      tone("sawtooth", 260, 90, 0.35, 0.12, 0.8);
+    },
+    moo: () => moo(0),
     boing: () => tone("sine", 220, 660, 0.25, 0.3),
     sparkle: () => [1047, 1319, 1568, 2093].forEach((f, i) => tone("triangle", f, f, 0.12, 0.15, i * 0.06)),
   };
