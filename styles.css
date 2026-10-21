@@ -499,3 +499,131 @@ footer {
 
   .walking-cow { font-size: 36px; }
 }
+
+/* ---------- ABC time ---------- */
+
+.abc-button {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 8;
+  transform: translateX(-50%);
+  height: 56px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 28px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  font-family: "Baloo 2", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.abc-button span {
+  display: inline-block;
+  animation: wave 2.4s ease-in-out infinite;
+}
+
+.abc-button .abc-a { color: #ff5c5c; }
+.abc-button .abc-b { color: #5cc8ff; animation-delay: 0.15s; }
+.abc-button .abc-c { color: #7bd389; animation-delay: 0.3s; }
+
+.abc-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--abc, #ff8a5c);
+  transition: background 0.4s ease;
+}
+
+.abc-stage[hidden] { display: none; }
+
+.abc-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 24px 40px 28px;
+  border: 0;
+  border-radius: 32px;
+  background: #fff;
+  color: #3a3a3a;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-family: "Baloo 2", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.abc-card.in { animation: pop-in 0.6s cubic-bezier(.3, 1.5, .5, 1); }
+
+.abc-letter {
+  font-size: min(34vw, 190px);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--abc, #ff8a5c);
+}
+
+.abc-pic {
+  font-size: min(26vw, 130px);
+  line-height: 1.1;
+  animation: cow-wiggle 0.6s ease-in-out infinite alternate;
+}
+
+.abc-word {
+  font-size: min(9vw, 2.6rem);
+  font-weight: 500;
+}
+
+.abc-word b { color: var(--abc, #ff8a5c); }
+
+.abc-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #3a3a3a;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.abc-nav {
+  display: flex;
+  gap: 40px;
+  margin-top: 28px;
+}
+
+.abc-nav button {
+  width: 64px;
+  height: 64px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #3a3a3a;
+  font-size: 2.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .abc-button {
+    height: 48px;
+    padding: 0 16px;
+    font-size: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .abc-button span, .abc-pic, .abc-card.in { animation: none; }
+}

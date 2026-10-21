@@ -176,7 +176,7 @@
 
   // Tap anywhere that isn't a button, photo or the big photo viewer.
   document.addEventListener("click", (e) => {
-    if (e.target.closest("button, .photo, .lightbox, .balloon, h1")) return;
+    if (e.target.closest("button, .photo, .lightbox, .balloon, h1, .abc-stage")) return;
     burst(e.clientX, e.clientY, 10);
     window.rudySound("sparkle");
   });
