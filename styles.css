@@ -146,3 +146,40 @@ footer {
   color: var(--muted);
   padding: 24px 16px 40px;
 }
+
+.toy-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.toy {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.puff {
+  position: absolute;
+  font-size: 32px;
+  transform: translate(-50%, -50%);
+  animation: puff 0.8s ease-out forwards;
+}
+
+@keyframes puff {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.2);
+  }
+}
