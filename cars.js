@@ -7,7 +7,8 @@
   layer.className = "toy-layer";
   document.body.appendChild(layer);
 
-  const count = Math.min(18, Math.max(8, Math.round((innerWidth * innerHeight) / 70000)));
+  const small = innerWidth < 600;
+  const count = small ? 6 : Math.min(18, Math.max(8, Math.round((innerWidth * innerHeight) / 70000)));
   const cars = [];
 
   function rand(min, max) {
@@ -29,7 +30,7 @@
       y: rand(0, innerHeight),
       vx: dir * rand(25, 70),
       vy: rand(-8, 8),
-      size: rand(26, 46),
+      size: small ? rand(20, 30) : rand(26, 46),
       phase: rand(0, Math.PI * 2),
       boost: 0,
       spin: 0,

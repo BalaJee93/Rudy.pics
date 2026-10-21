@@ -111,7 +111,7 @@
       s.style.top = y + "px";
       layer.appendChild(s);
       const angle = Math.random() * Math.PI * 2;
-      const dist = 60 + Math.random() * 110;
+      const dist = (innerWidth < 600 ? 40 : 60) + Math.random() * (innerWidth < 600 ? 70 : 110);
       const dx = Math.cos(angle) * dist;
       const dy = Math.sin(angle) * dist;
       s.animate(
@@ -137,7 +137,7 @@
   let balloons = 0;
 
   function launchBalloon() {
-    if (document.hidden || balloons >= 6) return;
+    if (document.hidden || balloons >= (innerWidth < 600 ? 3 : 6)) return;
     balloons++;
     const b = document.createElement("button");
     b.className = "balloon";

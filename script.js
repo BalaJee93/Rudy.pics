@@ -64,6 +64,16 @@
   lightbox.querySelector(".lb-next").addEventListener("click", () => show(current + 1));
   lightbox.addEventListener("click", (e) => { if (e.target === lightbox) close(); });
 
+  // Swipe left/right on phones.
+  let touchX = null;
+  lightbox.addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+  lightbox.addEventListener("touchend", (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    touchX = null;
+    if (Math.abs(dx) > 40) show(current + (dx < 0 ? 1 : -1));
+  });
+
   document.addEventListener("keydown", (e) => {
     if (lightbox.hidden) return;
     if (e.key === "Escape") close();

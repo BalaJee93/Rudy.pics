@@ -284,3 +284,62 @@ footer {
   font-size: 22px;
   cursor: pointer;
 }
+
+/* ---------- Phones ---------- */
+
+.lightbox button.lb-prev,
+.lightbox button.lb-next {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 32px 12px 20px; }
+  .hero p { font-size: 1rem; }
+
+  main { padding: 0 10px 40px; }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .photo {
+    margin: 0;
+    border-radius: 12px;
+  }
+
+  .photo figcaption {
+    padding: 8px 10px 10px;
+    font-size: 0.9rem;
+  }
+
+  .photo time { font-size: 0.75rem; }
+
+  .balloon {
+    width: 40px;
+    height: 50px;
+  }
+
+  .balloon::after { height: 36px; }
+
+  .sound-toggle {
+    width: 42px;
+    height: 42px;
+    font-size: 19px;
+  }
+
+  .lightbox img { max-width: 96vw; }
+  .lightbox figure { max-width: 96vw; margin-bottom: 72px; }
+  .lightbox img { max-height: 70vh; }
+  .lb-prev, .lb-next { top: auto; bottom: 24px; }
+  .lb-prev { left: calc(50% - 64px); }
+  .lb-next { right: calc(50% - 64px); }
+}
