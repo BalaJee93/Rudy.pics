@@ -99,9 +99,9 @@
 
     if (speech) {
       speech.cancel();
-      // Sing-song: the letter on its own up high, then the word a little lower.
-      say(letter + "!", 2, 0.9);
-      say(letter + " for " + word + "!", 1.7, 0.95, next);
+      // Spell "A" as it sounds, or some voices read it as "uh for apple".
+      const spoken = letter === "A" ? "Ay" : letter;
+      say(spoken + " for " + word + "!", 1.8, 0.9, next);
       // Safety net in case the browser never reports the end of speech.
       setTimeout(next, 7000);
     } else {
