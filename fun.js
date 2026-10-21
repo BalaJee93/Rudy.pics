@@ -35,43 +35,79 @@
     osc.stop(t + dur);
   }
 
-  // A cartoon "Mooo": buzzy low voice that opens up then sinks, with a little wobble.
-  function moo(delay) {
-    const a = ctx();
-    if (!a) return;
-    const t = a.currentTime + (delay || 0);
-    const filter = a.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.Q.value = 6;
-    filter.frequency.setValueAtTime(300, t);
-    filter.frequency.linearRampToValueAtTime(900, t + 0.35);
-    filter.frequency.linearRampToValueAtTime(350, t + 1.3);
-    const gain = a.createGain();
-    gain.gain.setValueAtTime(0.001, t);
-    gain.gain.exponentialRampToValueAtTime(0.4, t + 0.15);
-    gain.gain.setValueAtTime(0.4, t + 0.9);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
-    filter.connect(gain).connect(a.destination);
+  // A cow-like "Mmmoooo": a deep voice that starts with closed lips ("mm"),
+  // opens into "oo", swells, then sags at the end. Formant filters shape the vowel.
+  function moo(a, out, t) {
+    const dur = 1.8;
 
+    const lips = a.createBiquadFilter(); // "mm" -> "oo": lips opening and closing
+    lips.type = "lowpass";
+    lips.Q.value = 1;
+    lips.frequency.setValueAtTime(180, t);
+    lips.frequency.linearRampToValueAtTime(260, t + 0.25);
+    lips.frequency.exponentialRampToValueAtTime(1400, t + 0.6);
+    lips.frequency.setValueAtTime(1400, t + 1.2);
+    lips.frequency.exponentialRampToValueAtTime(400, t + dur);
+
+    const f1 = a.createBiquadFilter(); // vowel formants for a round "oo/aw"
+    f1.type = "peaking";
+    f1.frequency.value = 420;
+    f1.Q.value = 3;
+    f1.gain.value = 12;
+    const f2 = a.createBiquadFilter();
+    f2.type = "peaking";
+    f2.frequency.value = 850;
+    f2.Q.value = 4;
+    f2.gain.value = 8;
+
+    const gain = a.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.11, t + 0.12);
+    gain.gain.linearRampToValueAtTime(0.19, t + 0.7);
+    gain.gain.linearRampToValueAtTime(0.16, t + 1.3);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+    lips.connect(f1).connect(f2).connect(gain).connect(out);
+
+    // Slow, uneven wobble in the voice.
     const lfo = a.createOscillator();
     const lfoDepth = a.createGain();
-    lfo.frequency.value = 5;
-    lfoDepth.gain.value = 3;
+    lfo.frequency.value = 4.5;
+    lfoDepth.gain.value = 2.5;
     lfo.connect(lfoDepth);
 
-    [0, 3].forEach((detune) => {
+    [[0, "sawtooth", 1], [1.5, "sawtooth", 0.7], [0, "square", 0.25]].forEach(([detune, type, level]) => {
       const osc = a.createOscillator();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(115 + detune, t);
-      osc.frequency.linearRampToValueAtTime(145 + detune, t + 0.3);
-      osc.frequency.linearRampToValueAtTime(100 + detune, t + 1.4);
+      const lvl = a.createGain();
+      osc.type = type;
+      lvl.gain.value = level;
+      osc.frequency.setValueAtTime(88 + detune, t);
+      osc.frequency.linearRampToValueAtTime(118 + detune, t + 0.5);
+      osc.frequency.linearRampToValueAtTime(112 + detune, t + 1.1);
+      osc.frequency.linearRampToValueAtTime(78 + detune, t + dur);
       lfoDepth.connect(osc.frequency);
-      osc.connect(filter);
+      osc.connect(lvl).connect(lips);
       osc.start(t);
-      osc.stop(t + 1.4);
+      osc.stop(t + dur);
     });
+
+    // A little breathy air on top.
+    const noise = a.createBufferSource();
+    const buf = a.createBuffer(1, Math.floor(a.sampleRate * dur), a.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    noise.buffer = buf;
+    const air = a.createBiquadFilter();
+    air.type = "bandpass";
+    air.frequency.value = 700;
+    air.Q.value = 1.5;
+    const airGain = a.createGain();
+    airGain.gain.value = 0.04;
+    noise.connect(air).connect(airGain).connect(gain);
+    noise.start(t);
+
     lfo.start(t);
-    lfo.stop(t + 1.4);
+    lfo.stop(t + dur);
   }
 
   const SOUNDS = {
@@ -87,7 +123,10 @@
       tone("sawtooth", 70, 260, 0.45, 0.14, 0.35);
       tone("sawtooth", 260, 90, 0.35, 0.12, 0.8);
     },
-    moo: () => moo(0),
+    moo: () => {
+      const a = ctx();
+      if (a) moo(a, a.destination, a.currentTime);
+    },
     boing: () => tone("sine", 220, 660, 0.25, 0.3),
     sparkle: () => [1047, 1319, 1568, 2093].forEach((f, i) => tone("triangle", f, f, 0.12, 0.15, i * 0.06)),
   };

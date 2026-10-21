@@ -5,6 +5,7 @@
 //
 window.PHOTOS = [
     { src: "photos/IMG_7181.JPEG", caption: "Rudy With Tiger!", date: "2026-10-01" },
+    { src: "photos/party-lights.jpg", caption: "Lights, camera, Rudy! ✨" },
     { src: "photos/71BDE30C-B25F-4290-8C57-60FF84606F3C_1_105_c.jpeg", caption: "Too cool 😎", date: "2026-09-24" },
     { src: "photos/boss-mode.jpg", caption: "Boss mode 😎", date: "2026-06-13" },
 
