@@ -43,6 +43,7 @@
     car.boost = 1;
     car.spin = 0;
     puff(car.x, car.y);
+    if (window.rudySound) window.rudySound("vroom");
   }
 
   function puff(x, y) {

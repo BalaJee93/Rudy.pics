@@ -183,3 +183,104 @@ footer {
     transform: translate(-50%, -50%) scale(2.2);
   }
 }
+
+/* ---------- Extra fun ---------- */
+
+.hero h1 { display: inline-block; cursor: pointer; user-select: none; }
+.hero h1 .letter { color: inherit; }
+
+.letter {
+  display: inline-block;
+  animation: wave 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.1s);
+}
+
+.hero h1.jump .letter {
+  animation: jump 0.7s cubic-bezier(.3, 1.6, .5, 1) both;
+  animation-delay: calc(var(--i) * 0.05s);
+}
+
+@keyframes wave {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-8px) rotate(-4deg); }
+}
+
+@keyframes jump {
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-40px) scale(1.2) rotate(-10deg); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.pop-in { animation: pop-in 0.7s cubic-bezier(.3, 1.5, .5, 1) backwards; }
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.6) rotate(-6deg); }
+}
+
+.fun-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 6;
+}
+
+.spark {
+  position: absolute;
+  font-size: 26px;
+  pointer-events: none;
+}
+
+.balloon {
+  position: absolute;
+  bottom: -120px;
+  width: 54px;
+  height: 66px;
+  padding: 0;
+  border: 0;
+  border-radius: 50% 50% 48% 48%;
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.7) 0 10%, transparent 11%), var(--c);
+  box-shadow: inset -6px -8px 0 rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  pointer-events: auto;
+  animation-name: rise, sway;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-direction: normal, alternate;
+  animation-fill-mode: forwards, none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.balloon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+@keyframes rise {
+  to { bottom: calc(100vh + 120px); }
+}
+
+@keyframes sway {
+  from { transform: translateX(-14px) rotate(-6deg); }
+  to { transform: translateX(14px) rotate(6deg); }
+}
+
+.sound-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 8;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  font-size: 22px;
+  cursor: pointer;
+}
